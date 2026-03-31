@@ -1,0 +1,24 @@
+[project]
+name = "alphasift"
+version = "0.1.0"
+description = "Foundational data-access layer for Kraken OHLC data."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+  "pandas>=2.0",
+  "requests>=2.31",
+  "python-dotenv>=1.0",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=7.4",
+]
+
+[tool.pytest.ini_options]
+addopts = "-q"
+testpaths = ["tests"]
+
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
