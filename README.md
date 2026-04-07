@@ -9,6 +9,7 @@ Foundational data-access component for Kraken OHLC data, plus minimal strategy, 
 - A small long/flat backtest engine driven by target positions
 - A minimal strategy layer for generating target positions
 - A minimal single-symbol long/flat paper trading simulation layer
+- A minimal local FastAPI service layer with SQLite metadata for frontend-facing orchestration
 
 **What this is not**
 - Live trading or websockets
@@ -25,6 +26,10 @@ KRAKEN_API_KEY=
 KRAKEN_API_SECRET=
 KRAKEN_BASE_URL=https://api.kraken.com
 DEFAULT_DATA_DIR=./data
+APP_DB_PATH=./data/app/metadata.sqlite3
+ARTIFACTS_DIR=./data/artifacts
+API_HOST=127.0.0.1
+API_PORT=8000
 ```
 Public OHLC endpoints do not require auth, but the config supports future private endpoints.
 
@@ -39,7 +44,8 @@ Public OHLC endpoints do not require auth, but the config supports future privat
 |   |-- run_backtest.py
 |   |-- run_strategy_backtest.py
 |   |-- run_sma_experiments.py
-|   `-- run_paper_trader.py
+|   |-- run_paper_trader.py
+|   `-- run_api.py
 `-- src/
     `-- alphasift/
         |-- config.py
@@ -60,14 +66,20 @@ Public OHLC endpoints do not require auth, but the config supports future privat
         |   |-- base.py
         |   |-- buy_and_hold.py
         |   `-- sma_cross.py
-        `-- experiments/
-            |-- models.py
-            |-- export.py
-            `-- runner.py
-        `-- paper/
-            |-- models.py
-            |-- export.py
-            `-- engine.py
+        |-- experiments/
+        |   |-- models.py
+        |   |-- export.py
+        |   `-- runner.py
+        |-- paper/
+        |   |-- models.py
+        |   |-- export.py
+        |   `-- engine.py
+        `-- app/
+            |-- api.py
+            |-- schemas.py
+            |-- services.py
+            |-- jobs.py
+            `-- db.py
 ```
 
 ## Fetch Data
@@ -108,6 +120,17 @@ python scripts/run_paper_trader.py --pair BTC/USD --interval 60 --strategy sma_c
 ```
 This runs a fake-cash long/flat simulation on completed candles. Target changes are executed on the next completed bar open.
 Optionally, `--export-dir` writes account history and fills as deterministic CSV files. Use `--overwrite-export` to replace existing files.
+
+## Run Local API
+```
+python scripts/run_api.py
+```
+This starts a local FastAPI service that exposes:
+- health/system info,
+- strategy listing,
+- SMA experiment run creation and lookup,
+- paper session creation and lookup,
+- artifact metadata listing and lookup.
 
 ## Why This Base Layer Exists
 This project is intentionally scoped as a clean, modular research foundation so future prompts can add:
