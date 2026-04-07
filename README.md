@@ -1,6 +1,6 @@
 # alphasift
 
-Foundational data-access component for Kraken OHLC data, plus minimal strategy, backtest, experiment, and paper trading layers that operate on normalized candles.
+Foundational data-access component for Kraken OHLC data, plus minimal strategy, backtest, experiment, paper trading, and AI workflow layers that operate on normalized candles.
 
 **What this is**
 - A minimal, modular data-access layer
@@ -9,6 +9,8 @@ Foundational data-access component for Kraken OHLC data, plus minimal strategy, 
 - A small long/flat backtest engine driven by target positions
 - A minimal strategy layer for generating target positions
 - A minimal single-symbol long/flat paper trading simulation layer
+- A minimal local AI workflow layer for hypothesis generation, strategy drafting, and AI-planned local backtest reporting (Gemini-first)
+- A minimal local AI workflow layer for hypothesis generation, strategy drafting, and sandboxed AI code-report execution
 - A minimal local FastAPI service layer with SQLite metadata for frontend-facing orchestration
 - A thin local React frontend shell for viewing state and triggering runs
 
@@ -31,7 +33,31 @@ APP_DB_PATH=./data/app/metadata.sqlite3
 ARTIFACTS_DIR=./data/artifacts
 API_HOST=127.0.0.1
 API_PORT=8000
+GEMINI_API_KEY=
+GEMINI_BASE_URL=https://generativelanguage.googleapis.com/v1beta
+GEMINI_MODEL_NAME=gemini-2.5-flash
+GEMINI_TEMPERATURE=0.2
+GEMINI_TIMEOUT_SECONDS=45
+DEFAULT_AI_PROVIDER=gemini
+AI_ARTIFACTS_DIR=./data/artifacts/ai
+SANDBOX_DOCKER_BIN=docker
+SANDBOX_IMAGE=alphasift-sandbox:latest
+SANDBOX_RUNTIME=runsc
+SANDBOX_TIMEOUT_SECONDS=120
+SANDBOX_MEMORY_LIMIT=1024m
+SANDBOX_CPU_LIMIT=1.0
+SANDBOX_PIDS_LIMIT=128
+SANDBOX_MAX_REPAIR_ATTEMPTS=2
 ```
+
+### Build Sandbox Image
+Before running AI sandbox code reports, build the local sandbox image once:
+
+```
+docker build -f docker/sandbox.Dockerfile -t alphasift-sandbox:latest .
+```
+
+If you use gVisor, ensure the `runsc` runtime is installed and available to Docker.
 Public OHLC endpoints do not require auth, but the config supports future private endpoints.
 
 ## Project Structure
@@ -77,6 +103,12 @@ Public OHLC endpoints do not require auth, but the config supports future privat
         |   |-- models.py
         |   |-- export.py
         |   `-- engine.py
+        |-- ai/
+        |   |-- base.py
+        |   |-- models.py
+        |   |-- prompts.py
+        |   |-- gemini_client.py
+        |   `-- service.py
         `-- app/
             |-- api.py
             |-- schemas.py
@@ -133,6 +165,9 @@ This starts a local FastAPI service that exposes:
 - strategy listing,
 - SMA experiment run creation and lookup,
 - paper session creation and lookup,
+- AI hypothesis and strategy-draft run creation and lookup,
+- AI sandbox code-report run creation and lookup,
+- AI model and prompt-profile metadata listing,
 - job listing and lookup,
 - artifact metadata listing and lookup.
 
@@ -154,6 +189,11 @@ The UI reads `VITE_API_BASE_URL` (default `http://127.0.0.1:8000`) and provides:
 - strategies listing/detail
 - experiment run listing/detail + SMA run trigger form
 - paper session listing/detail + paper session trigger form
+- AI workspace with:
+  - hypothesis generation form
+  - strategy draft generation form with optional AI-selected local backtest execution
+  - sandbox code-report form (AI-generated code runs in isolated Docker container with bounded repair attempts)
+  - AI run listing/detail and artifact visibility
 - jobs listing/detail
 - artifact metadata listing
 

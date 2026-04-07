@@ -116,3 +116,62 @@ def test_artifact_metadata_persists():
         assert artifact["owner_id"] == "exp_1"
     finally:
         cleanup_workspace_temp_dir(temp_dir)
+
+
+def test_insert_and_retrieve_ai_run_metadata():
+    temp_dir = make_workspace_temp_dir()
+    try:
+        store = MetadataStore(temp_dir / "metadata.sqlite3")
+        job = create_job(store, kind="ai_hypothesis")
+
+        run_id = "ai_run_1"
+        store.insert(
+            "ai_runs",
+            {
+                "id": run_id,
+                "job_id": job["id"],
+                "provider": "gemini",
+                "model_name": "gemini-test",
+                "run_type": "hypothesis",
+                "status": "completed",
+                "created_at": utc_now_iso(),
+                "started_at": utc_now_iso(),
+                "finished_at": utc_now_iso(),
+                "input_json": "{\"research_objective\":\"test\"}",
+                "output_json": "{\"title\":\"test\"}",
+                "error_message": None,
+                "prompt_profile_id": "profile_1",
+            },
+        )
+
+        run = store.fetch_one("ai_runs", run_id)
+        assert run is not None
+        assert run["provider"] == "gemini"
+        assert run["run_type"] == "hypothesis"
+    finally:
+        cleanup_workspace_temp_dir(temp_dir)
+
+
+def test_insert_and_retrieve_prompt_profile_metadata():
+    temp_dir = make_workspace_temp_dir()
+    try:
+        store = MetadataStore(temp_dir / "metadata.sqlite3")
+        store.insert(
+            "prompt_profiles",
+            {
+                "id": "profile_1",
+                "template_name": "hypothesis_v1",
+                "run_type": "hypothesis",
+                "provider": "gemini",
+                "model_name": "gemini-test",
+                "temperature": 0.2,
+                "created_at": utc_now_iso(),
+                "notes": "default profile",
+            },
+        )
+
+        profile = store.fetch_one("prompt_profiles", "profile_1")
+        assert profile is not None
+        assert profile["template_name"] == "hypothesis_v1"
+    finally:
+        cleanup_workspace_temp_dir(temp_dir)

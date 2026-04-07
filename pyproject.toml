@@ -6,6 +6,7 @@ readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
   "pandas>=2.0",
+  "pyarrow>=16.0",
   "requests>=2.31",
   "python-dotenv>=1.0",
   "fastapi>=0.115",

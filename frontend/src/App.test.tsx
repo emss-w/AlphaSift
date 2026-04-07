@@ -24,6 +24,9 @@ describe("App", () => {
     await user.click(screen.getByRole("button", { name: "Paper Sessions" }));
     expect(await screen.findByRole("cell", { name: "session-1" })).toBeInTheDocument();
 
+    await user.click(screen.getByRole("button", { name: "AI Workspace" }));
+    expect(await screen.findByRole("cell", { name: "ai-run-1" })).toBeInTheDocument();
+
     await user.click(screen.getByRole("button", { name: "Jobs" }));
     expect(await screen.findByRole("cell", { name: "job-1" })).toBeInTheDocument();
 

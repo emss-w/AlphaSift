@@ -5,8 +5,11 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from alphasift.app.db import MetadataStore
 from alphasift.app.schemas import (
+    CreateCodeReportRequest,
+    CreateHypothesisRequest,
     CreatePaperSessionRequest,
     CreateSmaExperimentRequest,
+    CreateStrategyDraftRequest,
     HealthResponse,
 )
 from alphasift.app.services import AppServices
@@ -80,6 +83,37 @@ def create_app(config: Config | None = None) -> FastAPI:
         if session is None:
             raise HTTPException(status_code=404, detail=f"Paper session not found: {session_id}")
         return session
+
+    @app.post("/ai/hypotheses")
+    def create_hypothesis(payload: CreateHypothesisRequest, request: Request):
+        return _run_with_bad_request(lambda: _services(request).create_hypothesis(payload))
+
+    @app.post("/ai/strategy-drafts")
+    def create_strategy_draft(payload: CreateStrategyDraftRequest, request: Request):
+        return _run_with_bad_request(lambda: _services(request).create_strategy_draft(payload))
+
+    @app.post("/ai/code-reports")
+    def create_code_report(payload: CreateCodeReportRequest, request: Request):
+        return _run_with_bad_request(lambda: _services(request).create_code_report(payload))
+
+    @app.get("/ai/runs")
+    def list_ai_runs(request: Request):
+        return _services(request).list_ai_runs()
+
+    @app.get("/ai/runs/{run_id}")
+    def get_ai_run(run_id: str, request: Request):
+        run = _services(request).get_ai_run(run_id)
+        if run is None:
+            raise HTTPException(status_code=404, detail=f"AI run not found: {run_id}")
+        return run
+
+    @app.get("/ai/models")
+    def list_ai_models(request: Request):
+        return _run_with_bad_request(lambda: _services(request).list_ai_models())
+
+    @app.get("/ai/prompt-profiles")
+    def list_prompt_profiles(request: Request):
+        return _services(request).list_prompt_profiles()
 
     @app.get("/jobs")
     def list_jobs(request: Request):

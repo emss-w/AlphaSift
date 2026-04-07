@@ -439,6 +439,7 @@ label {
 
 input,
 select,
+textarea,
 fieldset {
   border: 1px solid #2a456e;
   border-radius: 10px;
@@ -456,10 +457,16 @@ input::placeholder {
 }
 
 input:focus,
-select:focus {
+select:focus,
+textarea:focus {
   outline: none;
   border-color: #5a95ff;
   box-shadow: 0 0 0 3px rgba(75, 141, 255, 0.22);
+}
+
+textarea {
+  resize: vertical;
+  min-height: 5.5rem;
 }
 
 fieldset {
@@ -554,6 +561,20 @@ code {
   white-space: normal;
   word-break: break-word;
   line-height: 1.35;
+}
+
+.json-block {
+  margin: 0;
+  padding: 0.65rem;
+  border: 1px solid #2b4a79;
+  border-radius: 10px;
+  background: #0f2343;
+  color: #c7ddff;
+  font-family: "JetBrains Mono", Consolas, monospace;
+  font-size: 0.78rem;
+  line-height: 1.4;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }
 
 @keyframes rise-in {

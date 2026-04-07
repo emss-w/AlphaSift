@@ -81,10 +81,41 @@ class MetadataStore:
                     owner_id TEXT NOT NULL
                 );
 
+                CREATE TABLE IF NOT EXISTS ai_runs (
+                    id TEXT PRIMARY KEY,
+                    job_id TEXT NOT NULL,
+                    provider TEXT NOT NULL,
+                    model_name TEXT NOT NULL,
+                    run_type TEXT NOT NULL,
+                    status TEXT NOT NULL,
+                    created_at TEXT NOT NULL,
+                    started_at TEXT,
+                    finished_at TEXT,
+                    input_json TEXT NOT NULL,
+                    output_json TEXT,
+                    error_message TEXT,
+                    prompt_profile_id TEXT,
+                    FOREIGN KEY(job_id) REFERENCES jobs(id)
+                );
+
+                CREATE TABLE IF NOT EXISTS prompt_profiles (
+                    id TEXT PRIMARY KEY,
+                    template_name TEXT NOT NULL,
+                    run_type TEXT NOT NULL,
+                    provider TEXT NOT NULL,
+                    model_name TEXT NOT NULL,
+                    temperature REAL,
+                    created_at TEXT NOT NULL,
+                    notes TEXT
+                );
+
                 CREATE INDEX IF NOT EXISTS idx_jobs_status ON jobs(status);
                 CREATE INDEX IF NOT EXISTS idx_experiment_runs_job_id ON experiment_runs(job_id);
                 CREATE INDEX IF NOT EXISTS idx_paper_sessions_job_id ON paper_sessions(job_id);
                 CREATE INDEX IF NOT EXISTS idx_artifacts_owner ON artifacts(owner_type, owner_id);
+                CREATE INDEX IF NOT EXISTS idx_ai_runs_job_id ON ai_runs(job_id);
+                CREATE INDEX IF NOT EXISTS idx_ai_runs_run_type ON ai_runs(run_type);
+                CREATE INDEX IF NOT EXISTS idx_prompt_profiles_run_type ON prompt_profiles(run_type);
                 """
             )
 

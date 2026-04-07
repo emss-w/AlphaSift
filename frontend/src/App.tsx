@@ -7,15 +7,17 @@ import { ExperimentsPage } from "./pages/ExperimentsPage";
 import { JobsPage } from "./pages/JobsPage";
 import { PaperSessionsPage } from "./pages/PaperSessionsPage";
 import { StrategiesPage } from "./pages/StrategiesPage";
+import { AiRunsPage } from "./pages/AiRunsPage";
 import { StatusBadge } from "./components/StatusBadge";
 
-type ViewKey = "dashboard" | "strategies" | "experiments" | "paper" | "jobs" | "artifacts";
+type ViewKey = "dashboard" | "strategies" | "experiments" | "paper" | "ai" | "jobs" | "artifacts";
 
 const VIEW_LABELS: Record<ViewKey, string> = {
   dashboard: "Dashboard",
   strategies: "Strategies",
   experiments: "Experiments",
   paper: "Paper Sessions",
+  ai: "AI Workspace",
   jobs: "Jobs",
   artifacts: "Artifacts",
 };
@@ -108,6 +110,7 @@ export default function App({ api }: AppProps) {
         {activeView === "strategies" ? <StrategiesPage api={resolvedApi} /> : null}
         {activeView === "experiments" ? <ExperimentsPage api={resolvedApi} /> : null}
         {activeView === "paper" ? <PaperSessionsPage api={resolvedApi} /> : null}
+        {activeView === "ai" ? <AiRunsPage api={resolvedApi} /> : null}
         {activeView === "jobs" ? <JobsPage api={resolvedApi} /> : null}
         {activeView === "artifacts" ? <ArtifactsPage api={resolvedApi} /> : null}
       </main>

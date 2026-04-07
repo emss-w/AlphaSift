@@ -1,11 +1,17 @@
 import type {
+  AiModelSummary,
+  AiRunSummary,
   ArtifactSummary,
+  CreateCodeReportRequest,
+  CreateHypothesisRequest,
   CreatePaperSessionRequest,
   CreateSmaExperimentRequest,
+  CreateStrategyDraftRequest,
   ExperimentRunSummary,
   HealthResponse,
   JobSummary,
   PaperSessionSummary,
+  PromptProfileSummary,
   StrategySummary,
   SystemInfoResponse,
 } from "../types";
@@ -18,6 +24,13 @@ export interface ApiClientLike {
   listExperiments(): Promise<ExperimentRunSummary[]>;
   getExperiment(runId: string): Promise<ExperimentRunSummary>;
   runSmaExperiment(payload: CreateSmaExperimentRequest): Promise<ExperimentRunSummary>;
+  createHypothesis(payload: CreateHypothesisRequest): Promise<AiRunSummary>;
+  createStrategyDraft(payload: CreateStrategyDraftRequest): Promise<AiRunSummary>;
+  createCodeReport(payload: CreateCodeReportRequest): Promise<AiRunSummary>;
+  listAiRuns(): Promise<AiRunSummary[]>;
+  getAiRun(runId: string): Promise<AiRunSummary>;
+  listAiModels(): Promise<AiModelSummary[]>;
+  listPromptProfiles(): Promise<PromptProfileSummary[]>;
   listPaperSessions(): Promise<PaperSessionSummary[]>;
   getPaperSession(sessionId: string): Promise<PaperSessionSummary>;
   startPaperSession(payload: CreatePaperSessionRequest): Promise<PaperSessionSummary>;
@@ -73,6 +86,43 @@ export class ApiClient implements ApiClientLike {
       method: "POST",
       body: JSON.stringify(payload),
     });
+  }
+
+  createHypothesis(payload: CreateHypothesisRequest): Promise<AiRunSummary> {
+    return this.request<AiRunSummary>("/ai/hypotheses", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
+  }
+
+  createStrategyDraft(payload: CreateStrategyDraftRequest): Promise<AiRunSummary> {
+    return this.request<AiRunSummary>("/ai/strategy-drafts", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
+  }
+
+  createCodeReport(payload: CreateCodeReportRequest): Promise<AiRunSummary> {
+    return this.request<AiRunSummary>("/ai/code-reports", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
+  }
+
+  listAiRuns(): Promise<AiRunSummary[]> {
+    return this.request<AiRunSummary[]>("/ai/runs");
+  }
+
+  getAiRun(runId: string): Promise<AiRunSummary> {
+    return this.request<AiRunSummary>(`/ai/runs/${encodeURIComponent(runId)}`);
+  }
+
+  listAiModels(): Promise<AiModelSummary[]> {
+    return this.request<AiModelSummary[]>("/ai/models");
+  }
+
+  listPromptProfiles(): Promise<PromptProfileSummary[]> {
+    return this.request<PromptProfileSummary[]>("/ai/prompt-profiles");
   }
 
   listPaperSessions(): Promise<PaperSessionSummary[]> {
