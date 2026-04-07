@@ -85,6 +85,18 @@ class AppServices:
         row = self.store.fetch_one("strategies", strategy_id)
         return StrategySummary(**row) if row else None
 
+    def list_jobs(self) -> list[JobSummary]:
+        """List jobs newest-first."""
+        rows = self.store.fetch_all("jobs")
+        return [self._to_job_summary(row) for row in rows]
+
+    def get_job(self, job_id: str) -> JobSummary | None:
+        """Fetch one job by identifier."""
+        row = self.store.fetch_one("jobs", job_id)
+        if row is None:
+            return None
+        return self._to_job_summary(row)
+
     def run_sma_experiment(self, request: CreateSmaExperimentRequest) -> ExperimentRunSummary:
         """Run SMA cross experiments synchronously and persist metadata."""
         job = create_job(self.store, kind="experiment_sma_cross")

@@ -10,6 +10,7 @@ Foundational data-access component for Kraken OHLC data, plus minimal strategy, 
 - A minimal strategy layer for generating target positions
 - A minimal single-symbol long/flat paper trading simulation layer
 - A minimal local FastAPI service layer with SQLite metadata for frontend-facing orchestration
+- A thin local React frontend shell for viewing state and triggering runs
 
 **What this is not**
 - Live trading or websockets
@@ -46,6 +47,8 @@ Public OHLC endpoints do not require auth, but the config supports future privat
 |   |-- run_sma_experiments.py
 |   |-- run_paper_trader.py
 |   `-- run_api.py
+|-- frontend/
+|   `-- (Vite + React + TypeScript local UI shell)
 `-- src/
     `-- alphasift/
         |-- config.py
@@ -130,7 +133,29 @@ This starts a local FastAPI service that exposes:
 - strategy listing,
 - SMA experiment run creation and lookup,
 - paper session creation and lookup,
+- job listing and lookup,
 - artifact metadata listing and lookup.
+
+## Run Local Frontend
+1. Start the API:
+```
+python scripts/run_api.py
+```
+2. In another terminal:
+```
+cd frontend
+cp .env.example .env
+npm install
+npm run dev
+```
+
+The UI reads `VITE_API_BASE_URL` (default `http://127.0.0.1:8000`) and provides:
+- dashboard summary
+- strategies listing/detail
+- experiment run listing/detail + SMA run trigger form
+- paper session listing/detail + paper session trigger form
+- jobs listing/detail
+- artifact metadata listing
 
 ## Why This Base Layer Exists
 This project is intentionally scoped as a clean, modular research foundation so future prompts can add:

@@ -11,3 +11,4 @@ data/cache/
 .pytest-tmp/
 pytest-cache-files-*/
 AGENTS.md
+data/app/metadata.sqlite3

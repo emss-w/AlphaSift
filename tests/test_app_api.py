@@ -67,6 +67,31 @@ def test_health_endpoint_returns_success(monkeypatch):
         cleanup_workspace_temp_dir(temp_dir)
 
 
+def test_health_endpoint_allows_local_frontend_cors_preflight(monkeypatch):
+    temp_dir = make_workspace_temp_dir()
+    try:
+        candles = _make_candles()
+        monkeypatch.setattr(
+            "alphasift.app.services.create_kraken_provider",
+            lambda cfg: _StubProvider(candles),
+        )
+        app = create_app(_make_config(temp_dir))
+        client = TestClient(app)
+
+        response = client.options(
+            "/health",
+            headers={
+                "Origin": "http://localhost:5173",
+                "Access-Control-Request-Method": "GET",
+            },
+        )
+
+        assert response.status_code == 200
+        assert response.headers["access-control-allow-origin"] == "http://localhost:5173"
+    finally:
+        cleanup_workspace_temp_dir(temp_dir)
+
+
 def test_strategies_endpoint_returns_structured_data(monkeypatch):
     temp_dir = make_workspace_temp_dir()
     try:
@@ -148,5 +173,44 @@ def test_paper_session_creation_and_detail_endpoints(monkeypatch):
         detail = detail_response.json()
         assert detail["id"] == session["id"]
         assert detail["job"]["status"] == "completed"
+    finally:
+        cleanup_workspace_temp_dir(temp_dir)
+
+
+def test_jobs_endpoints_return_job_records(monkeypatch):
+    temp_dir = make_workspace_temp_dir()
+    try:
+        candles = _make_candles()
+        monkeypatch.setattr(
+            "alphasift.app.services.create_kraken_provider",
+            lambda cfg: _StubProvider(candles),
+        )
+        app = create_app(_make_config(temp_dir))
+        client = TestClient(app)
+
+        create_response = client.post(
+            "/experiments/sma-cross",
+            json={
+                "pair": "BTC/USD",
+                "interval": 60,
+                "short_windows": [2],
+                "long_windows": [4],
+            },
+        )
+        assert create_response.status_code == 200
+        run = create_response.json()
+
+        list_response = client.get("/jobs")
+        assert list_response.status_code == 200
+        jobs = list_response.json()
+        assert isinstance(jobs, list)
+        assert len(jobs) >= 1
+        assert any(job["id"] == run["job_id"] for job in jobs)
+
+        detail_response = client.get(f"/jobs/{run['job_id']}")
+        assert detail_response.status_code == 200
+        job = detail_response.json()
+        assert job["id"] == run["job_id"]
+        assert job["status"] == "completed"
     finally:
         cleanup_workspace_temp_dir(temp_dir)

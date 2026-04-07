@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from fastapi import FastAPI, HTTPException, Request
+from fastapi.middleware.cors import CORSMiddleware
 
 from alphasift.app.db import MetadataStore
 from alphasift.app.schemas import (
@@ -19,6 +20,16 @@ def create_app(config: Config | None = None) -> FastAPI:
     services = AppServices(cfg, store)
 
     app = FastAPI(title="AlphaSift Local API", version="0.1.0")
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=[
+            "http://localhost:5173",
+            "http://127.0.0.1:5173",
+        ],
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
     app.state.services = services
 
     @app.get("/health", response_model=HealthResponse)
@@ -69,6 +80,17 @@ def create_app(config: Config | None = None) -> FastAPI:
         if session is None:
             raise HTTPException(status_code=404, detail=f"Paper session not found: {session_id}")
         return session
+
+    @app.get("/jobs")
+    def list_jobs(request: Request):
+        return _services(request).list_jobs()
+
+    @app.get("/jobs/{job_id}")
+    def get_job(job_id: str, request: Request):
+        job = _services(request).get_job(job_id)
+        if job is None:
+            raise HTTPException(status_code=404, detail=f"Job not found: {job_id}")
+        return job
 
     @app.get("/artifacts")
     def list_artifacts(request: Request):

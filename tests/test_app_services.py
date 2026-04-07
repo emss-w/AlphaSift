@@ -88,6 +88,11 @@ def test_run_sma_experiment_creates_persisted_metadata(monkeypatch):
         assert result.result_count == 1
         assert result.job.status == "completed"
         assert services.get_experiment_run(result.id) is not None
+        jobs = services.list_jobs()
+        assert any(job.id == result.job_id for job in jobs)
+        job = services.get_job(result.job_id)
+        assert job is not None
+        assert job.status == "completed"
     finally:
         cleanup_workspace_temp_dir(temp_dir)
 
