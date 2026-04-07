@@ -1,6 +1,6 @@
 # alphasift
 
-Foundational data-access component for Kraken OHLC data, plus a minimal strategy layer and backtest engine that operate on cached normalized candles.
+Foundational data-access component for Kraken OHLC data, plus minimal strategy, backtest, experiment, and paper trading layers that operate on normalized candles.
 
 **What this is**
 - A minimal, modular data-access layer
@@ -8,6 +8,7 @@ Foundational data-access component for Kraken OHLC data, plus a minimal strategy
 - A clean separation between HTTP client, provider logic, and IO
 - A small long/flat backtest engine driven by target positions
 - A minimal strategy layer for generating target positions
+- A minimal single-symbol long/flat paper trading simulation layer
 
 **What this is not**
 - Live trading or websockets
@@ -37,7 +38,8 @@ Public OHLC endpoints do not require auth, but the config supports future privat
 |   |-- fetch_kraken_ohlc.py
 |   |-- run_backtest.py
 |   |-- run_strategy_backtest.py
-|   `-- run_sma_experiments.py
+|   |-- run_sma_experiments.py
+|   `-- run_paper_trader.py
 `-- src/
     `-- alphasift/
         |-- config.py
@@ -62,6 +64,10 @@ Public OHLC endpoints do not require auth, but the config supports future privat
             |-- models.py
             |-- export.py
             `-- runner.py
+        `-- paper/
+            |-- models.py
+            |-- export.py
+            `-- engine.py
 ```
 
 ## Fetch Data
@@ -94,10 +100,19 @@ python scripts/run_sma_experiments.py --pair BTC/USD --interval 60 --export-csv 
 This runs a simple SMA cross parameter sweep and prints ranked results.
 Optionally, `--export-csv` writes ranked results to CSV. Use `--overwrite-export` to replace an existing file.
 
+## Run Minimal Paper Trading
+```
+python scripts/run_paper_trader.py --pair BTC/USD --interval 60 --strategy buy_and_hold --initial-cash 10000
+python scripts/run_paper_trader.py --pair BTC/USD --interval 60 --strategy sma_cross --short-window 10 --long-window 30
+python scripts/run_paper_trader.py --pair BTC/USD --interval 60 --strategy sma_cross --export-dir data/paper_sessions --export-prefix btcusd_60m
+```
+This runs a fake-cash long/flat simulation on completed candles. Target changes are executed on the next completed bar open.
+Optionally, `--export-dir` writes account history and fills as deterministic CSV files. Use `--overwrite-export` to replace existing files.
+
 ## Why This Base Layer Exists
-This project is intentionally scoped to a clean data-access layer so future prompts can add:
-- Strategy modules
-- Parameter sweeps
-- Paper trading
+This project is intentionally scoped as a clean, modular research foundation so future prompts can add:
+- Broader result persistence
+- Live execution components
+- More data providers
 
 without refactoring the foundations.
