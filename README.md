@@ -1,15 +1,15 @@
 # alphasift
 
-Foundational data-access component for Kraken OHLC data, plus a minimal backtest engine that operates on cached normalized candles.
+Foundational data-access component for Kraken OHLC data, plus a minimal strategy layer and backtest engine that operate on cached normalized candles.
 
 **What this is**
 - A minimal, modular data-access layer
 - A normalized OHLCV schema with local caching
 - A clean separation between HTTP client, provider logic, and IO
 - A small long/flat backtest engine driven by target positions
+- A minimal strategy layer for generating target positions
 
 **What this is not**
-- Strategy code
 - Live trading or websockets
 - Databases or Docker
 
@@ -35,7 +35,8 @@ Public OHLC endpoints do not require auth, but the config supports future privat
 |   `-- cache/
 |-- scripts/
 |   |-- fetch_kraken_ohlc.py
-|   `-- run_backtest.py
+|   |-- run_backtest.py
+|   `-- run_strategy_backtest.py
 `-- src/
     `-- alphasift/
         |-- config.py
@@ -48,10 +49,14 @@ Public OHLC endpoints do not require auth, but the config supports future privat
         |   |-- kraken_client.py
         |   |-- kraken_provider.py
         |   `-- loaders.py
-        `-- backtest/
-            |-- engine.py
-            |-- metrics.py
-            `-- models.py
+        |-- backtest/
+        |   |-- engine.py
+        |   |-- metrics.py
+        |   `-- models.py
+        `-- strategies/
+            |-- base.py
+            |-- buy_and_hold.py
+            `-- sma_cross.py
 ```
 
 ## Fetch Data
@@ -68,6 +73,13 @@ and caches it under `data/cache`.
 python scripts/run_backtest.py --pair BTC/USD --interval 60
 ```
 This uses cached data and runs a basic long/flat backtest with a buy-and-hold target position.
+
+## Run Strategy Backtest
+```
+python scripts/run_strategy_backtest.py --pair BTC/USD --interval 60 --strategy buy_and_hold
+python scripts/run_strategy_backtest.py --pair BTC/USD --interval 60 --strategy sma_cross --short-window 10 --long-window 30
+```
+This loads cached data, generates target positions from the chosen strategy, and runs the backtest engine.
 
 ## Why This Base Layer Exists
 This project is intentionally scoped to a clean data-access layer so future prompts can add:
