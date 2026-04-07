@@ -1,14 +1,14 @@
 # alphasift
 
-Foundational data-access component for Kraken OHLC data. This repo intentionally contains only the base layer needed to fetch, normalize, and locally cache historical candles so future prompts can build backtesting and strategy layers cleanly.
+Foundational data-access component for Kraken OHLC data, plus a minimal backtest engine that operates on cached normalized candles.
 
 **What this is**
 - A minimal, modular data-access layer
 - A normalized OHLCV schema with local caching
 - A clean separation between HTTP client, provider logic, and IO
+- A small long/flat backtest engine driven by target positions
 
 **What this is not**
-- Backtesting engine
 - Strategy code
 - Live trading or websockets
 - Databases or Docker
@@ -30,23 +30,28 @@ Public OHLC endpoints do not require auth, but the config supports future privat
 ## Project Structure
 ```
 .
-├── data/
-│   ├── raw/
-│   └── cache/
-├── scripts/
-│   └── fetch_kraken_ohlc.py
-└── src/
-    └── alphasift/
-        ├── config.py
-        ├── logging_config.py
-        ├── utils/
-        └── data/
-            ├── base.py
-            ├── models.py
-            ├── cache.py
-            ├── kraken_client.py
-            ├── kraken_provider.py
-            └── loaders.py
+|-- data/
+|   |-- raw/
+|   `-- cache/
+|-- scripts/
+|   |-- fetch_kraken_ohlc.py
+|   `-- run_backtest.py
+`-- src/
+    `-- alphasift/
+        |-- config.py
+        |-- logging_config.py
+        |-- utils/
+        |-- data/
+        |   |-- base.py
+        |   |-- models.py
+        |   |-- cache.py
+        |   |-- kraken_client.py
+        |   |-- kraken_provider.py
+        |   `-- loaders.py
+        `-- backtest/
+            |-- engine.py
+            |-- metrics.py
+            `-- models.py
 ```
 
 ## Fetch Data
@@ -58,9 +63,14 @@ This fetches Kraken OHLC data, normalizes to the schema:
 `timestamp, open, high, low, close, volume, trades, vwap`
 and caches it under `data/cache`.
 
+## Run Minimal Backtest
+```
+python scripts/run_backtest.py --pair BTC/USD --interval 60
+```
+This uses cached data and runs a basic long/flat backtest with a buy-and-hold target position.
+
 ## Why This Base Layer Exists
 This project is intentionally scoped to a clean data-access layer so future prompts can add:
-- A backtesting engine
 - Strategy modules
 - Parameter sweeps
 - Paper trading

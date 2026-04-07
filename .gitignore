@@ -10,3 +10,4 @@ data/cache/
 *.egg-info/
 .pytest-tmp/
 pytest-cache-files-*/
+AGENTS.md
