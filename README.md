@@ -36,7 +36,8 @@ Public OHLC endpoints do not require auth, but the config supports future privat
 |-- scripts/
 |   |-- fetch_kraken_ohlc.py
 |   |-- run_backtest.py
-|   `-- run_strategy_backtest.py
+|   |-- run_strategy_backtest.py
+|   `-- run_sma_experiments.py
 `-- src/
     `-- alphasift/
         |-- config.py
@@ -53,10 +54,14 @@ Public OHLC endpoints do not require auth, but the config supports future privat
         |   |-- engine.py
         |   |-- metrics.py
         |   `-- models.py
-        `-- strategies/
-            |-- base.py
-            |-- buy_and_hold.py
-            `-- sma_cross.py
+        |-- strategies/
+        |   |-- base.py
+        |   |-- buy_and_hold.py
+        |   `-- sma_cross.py
+        `-- experiments/
+            |-- models.py
+            |-- export.py
+            `-- runner.py
 ```
 
 ## Fetch Data
@@ -80,6 +85,14 @@ python scripts/run_strategy_backtest.py --pair BTC/USD --interval 60 --strategy 
 python scripts/run_strategy_backtest.py --pair BTC/USD --interval 60 --strategy sma_cross --short-window 10 --long-window 30
 ```
 This loads cached data, generates target positions from the chosen strategy, and runs the backtest engine.
+
+## Run SMA Experiments
+```
+python scripts/run_sma_experiments.py --pair BTC/USD --interval 60 --short-min 5 --short-max 20 --long-min 30 --long-max 80 --step 5
+python scripts/run_sma_experiments.py --pair BTC/USD --interval 60 --export-csv data/experiments/sma_results.csv
+```
+This runs a simple SMA cross parameter sweep and prints ranked results.
+Optionally, `--export-csv` writes ranked results to CSV. Use `--overwrite-export` to replace an existing file.
 
 ## Why This Base Layer Exists
 This project is intentionally scoped to a clean data-access layer so future prompts can add:
